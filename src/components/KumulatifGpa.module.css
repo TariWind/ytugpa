@@ -1,0 +1,108 @@
+.sarmalayici { margin-top: 40px; }
+
+
+.bolumBaslik {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+
+.cizgi {
+    height: 1px;
+    flex: 1;
+    background: var(--clr-border);
+}
+
+
+.baslikMetin {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--clr-muted);
+    white-space: nowrap;
+}
+
+
+.donemListesi { margin-bottom: 16px; }
+
+
+.donemSatir {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 14px;
+    margin-bottom: 6px;
+    background: var(--clr-white);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    box-shadow: var(--shadow-sm);
+}
+
+
+.donemAdi { color: var(--clr-text); font-weight: 600; }
+
+
+.donemDetay {
+    color: var(--clr-muted);
+    font-size: 13px;
+    margin-left: 8px;
+    font-weight: 400;
+}
+
+
+.donemGpa {
+    font-size: 16px;
+    font-weight: 800;
+}
+
+
+.kumKart {
+    padding: 22px 26px;
+    border: 2px solid;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    box-shadow: var(--shadow-sm);
+}
+
+
+.kumBaslik {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--clr-muted);
+    margin-bottom: 6px;
+}
+
+
+.kumRakam {
+    font-size: 54px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -2px;
+}
+
+
+.kumEtiket {
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 6px;
+}
+
+
+.kumDetaylar {
+    font-size: 14px;
+    color: var(--clr-muted);
+    line-height: 2;
+}
+
+
+.kumDetaylar strong { color: var(--clr-text); }
