@@ -5,23 +5,23 @@ import DersListesi from "./components/DersListesi";
 import { gpaHesapla } from "./utils/hesapla";
 import GpaKarti from "./components/GpaKarti";
 import KumulatifGpa from "./components/KumulatifGpa";
-import styles from "./App.module.css";
-
+// ← import styles satırı silindi
 
 function localKey(fid, bolum, donem) {
   return `ytugpa_${fid}_${encodeURIComponent(bolum)}_${donem}`;
 }
 
-// ── Dropdown ────────────────────────────────────────────────────────────────
 function Dropdown({ label, value, onChange, options, disabled }) {
   return (
-    <div className={styles.dropdownSarti}>
-      <label className={styles.dropdownLabel}>{label}</label>
+    <div>
+      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+        {label}
+      </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className={styles.dropdownSelect}
+        className="dropdown-select w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm bg-white text-gray-900 cursor-pointer transition-all duration-150 focus:outline-none focus:border-ytu-red focus:ring-2 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
       >
         <option value="">{disabled ? "— önce üstü seç —" : "— seçiniz —"}</option>
         {options.map((opt) => (
@@ -32,7 +32,6 @@ function Dropdown({ label, value, onChange, options, disabled }) {
   );
 }
 
-// ── Ana bileşen ──────────────────────────────────────────────────────────────
 export default function App() {
   const [secilenFakulteId, setSecilenFakulteId] = useState("");
   const [secilenBolum, setSecilenBolum]         = useState("");
@@ -75,16 +74,16 @@ export default function App() {
       ? (DERSLER[secilenFakulteId]?.[secilenBolum]?.[Number(secilenDonem)] ?? [])
       : null;
 
-  const fakulteOptions = FAKULTELER.map((f) => ({ value: f.id,  label: f.isim }));
+  const fakulteOptions = FAKULTELER.map((f) => ({ value: f.id, label: f.isim }));
   const bolumOptions   = secilenFakulte
-  ? secilenFakulte.bolumler.map((b) => ({
-    value: b,
-    label: b
-      .replace('(%100 Türkçe)', '🇹🇷')
-      .replace('(%30 İngilizce)', '(%30 İng)')
-      .replace('(%100 İngilizce)', '(%100 İng)'),
-  }))
-  : [];
+    ? secilenFakulte.bolumler.map((b) => ({
+        value: b,
+        label: b
+          .replace("(%100 Türkçe)",   "🇹🇷")
+          .replace("(%30 İngilizce)",  "(%30 İng)")
+          .replace("(%100 İngilizce)", "(%100 İng)"),
+      }))
+    : [];
   const donemOptions = DONEMLER.map((d) => ({ value: String(d), label: `${d}. Dönem` }));
 
   const gpasonucu = dersler ? gpaHesapla(dersler, notlar) : null;
@@ -108,51 +107,55 @@ export default function App() {
       if (!kayitli) continue;
       const kayitliNotlar = JSON.parse(kayitli);
       const dersListe = DERSLER[secilenFakulteId]?.[secilenBolum]?.[donem] ?? [];
-      if (Object.keys(kayitliNotlar).length > 0 && dersListe.length > 0) {
+      if (Object.keys(kayitliNotlar).length > 0 && dersListe.length > 0)
         veriler.push({ donem, dersler: dersListe, notlar: kayitliNotlar });
-      }
     }
     setDonemVerileri(veriler);
   }, [secilenFakulteId, secilenBolum, notlar]);
 
   return (
     <>
-      {/* Header — sayfa dışında, tam genişlikte */}
-      <header className={styles.header}>
-        <div style={{ maxWidth: 780, margin: "0 auto", padding: "0 24px" }}>
-          <h1 className={styles.baslik}>YTÜ GPA Hesaplayıcı</h1>
-          <p className={styles.altbaslik}>
+      <header className="bg-ytu-red text-white px-6 py-7 rounded-b-2xl mb-9 shadow-md">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-2xl font-extrabold tracking-tight mb-1">
+            YTÜ GPA Hesaplayıcı
+          </h1>
+          <p className="text-sm opacity-80">
             Bölümünü seç · notlarını gir · ortalamana bak
           </p>
         </div>
       </header>
 
-      <main className={styles.sayfa}>
-        {/* Seçiciler */}
-        <div className={styles.seciciSatir}>
-          <div className={styles.seciciGenis}>
+      <main className="max-w-3xl mx-auto px-6 pb-20">
+        <div className="flex gap-3 flex-wrap mb-6">
+          <div className="flex-[2_1_200px]">
             <Dropdown label="Fakülte" value={secilenFakulteId}
               onChange={fakulteDegisti} options={fakulteOptions} />
           </div>
-          <div className={styles.seciciGenis}>
+          <div className="flex-[2_1_200px]">
             <Dropdown label="Bölüm" value={secilenBolum}
               onChange={bolumDegisti} options={bolumOptions}
               disabled={!secilenFakulteId} />
           </div>
-          <div className={styles.seciciDar}>
+          <div className="flex-[1_1_120px]">
             <Dropdown label="Dönem" value={secilenDonem}
               onChange={donemDegisti} options={donemOptions}
               disabled={!secilenBolum} />
           </div>
         </div>
 
-        {/* İçerik */}
         {dersler !== null && (
           <>
-            <DersListesi dersler={dersler} notlar={notlar} onNotDegisti={notDegisti} donem = {secilenDonem} />
+            <DersListesi
+              dersler={dersler} notlar={notlar}
+              onNotDegisti={notDegisti} donem={secilenDonem}
+            />
             <GpaKarti sonuc={gpasonucu} />
             {Object.keys(notlar).length > 0 && (
-              <button onClick={notlariTemizle} className={styles.temizleBtn}>
+              <button
+                onClick={notlariTemizle}
+                className="mt-3 px-4 py-2 border-2 border-red-200 rounded-lg bg-white text-red-500 text-xs font-semibold cursor-pointer transition-colors hover:bg-red-50"
+              >
                 Notları Temizle
               </button>
             )}
