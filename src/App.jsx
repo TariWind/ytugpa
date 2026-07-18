@@ -5,7 +5,8 @@ import DersListesi from "./components/DersListesi";
 import { gpaHesapla } from "./utils/hesapla";
 import GpaKarti from "./components/GpaKarti";
 import KumulatifGpa from "./components/KumulatifGpa";
-// ← import styles satırı silindi
+import TemaToggle from "./components/TemaToggle";
+import { useDarkMode } from "./hooks/useDarkMode";
 
 function localKey(fid, bolum, donem) {
   return `ytugpa_${fid}_${encodeURIComponent(bolum)}_${donem}`;
@@ -14,14 +15,14 @@ function localKey(fid, bolum, donem) {
 function Dropdown({ label, value, onChange, options, disabled }) {
   return (
     <div>
-      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+      <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1.5">
         {label}
       </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className="dropdown-select w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm bg-white text-gray-900 cursor-pointer transition-all duration-150 focus:outline-none focus:border-ytu-red focus:ring-2 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
+        className="dropdown-select w-full px-3 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 cursor-pointer transition-all duration-150 focus:outline-none focus:border-ytu-red focus:ring-2 focus:ring-ytu-red/10 disabled:bg-gray-50 dark:disabled:bg-gray-900 disabled:text-gray-400 dark:disabled:text-gray-600 disabled:cursor-not-allowed"
       >
         <option value="">{disabled ? "— önce üstü seç —" : "— seçiniz —"}</option>
         {options.map((opt) => (
@@ -33,6 +34,8 @@ function Dropdown({ label, value, onChange, options, disabled }) {
 }
 
 export default function App() {
+  const [karanlik, setKaranlik] = useDarkMode();
+
   const [secilenFakulteId, setSecilenFakulteId] = useState("");
   const [secilenBolum, setSecilenBolum]         = useState("");
   const [secilenDonem, setSecilenDonem]         = useState("");
@@ -115,32 +118,40 @@ export default function App() {
 
   return (
     <>
-      <header className="bg-ytu-red text-white px-6 py-7 rounded-b-2xl mb-9 shadow-md">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-2xl font-extrabold tracking-tight mb-1">
-            YTÜ GPA Hesaplayıcı
-          </h1>
-          <p className="text-sm opacity-80">
-            Bölümünü seç · notlarını gir · ortalamana bak
-          </p>
+      <header className="sticky top-0 z-10 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-colors duration-200">
+        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-2 h-6 bg-ytu-red rounded-full" />
+            <div>
+              <h1 className="font-display text-base font-bold text-gray-900 dark:text-white leading-tight">
+                YTÜ GPA Hesaplayıcı
+              </h1>
+              <p className="text-xs text-gray-400 dark:text-gray-500 leading-tight">
+                Bölümünü seç · notlarını gir · ortalamana bak
+              </p>
+            </div>
+          </div>
+          <TemaToggle karanlik={karanlik} onToggle={setKaranlik} />
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-6 pb-20">
-        <div className="flex gap-3 flex-wrap mb-6">
-          <div className="flex-[2_1_200px]">
-            <Dropdown label="Fakülte" value={secilenFakulteId}
-              onChange={fakulteDegisti} options={fakulteOptions} />
-          </div>
-          <div className="flex-[2_1_200px]">
-            <Dropdown label="Bölüm" value={secilenBolum}
-              onChange={bolumDegisti} options={bolumOptions}
-              disabled={!secilenFakulteId} />
-          </div>
-          <div className="flex-[1_1_120px]">
-            <Dropdown label="Dönem" value={secilenDonem}
-              onChange={donemDegisti} options={donemOptions}
-              disabled={!secilenBolum} />
+      <main className="max-w-3xl mx-auto px-6 pt-8 pb-20">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow-sm transition-colors duration-200">
+          <div className="flex gap-3 flex-wrap">
+            <div className="flex-[2_1_200px]">
+              <Dropdown label="Fakülte" value={secilenFakulteId}
+                onChange={fakulteDegisti} options={fakulteOptions} />
+            </div>
+            <div className="flex-[2_1_200px]">
+              <Dropdown label="Bölüm" value={secilenBolum}
+                onChange={bolumDegisti} options={bolumOptions}
+                disabled={!secilenFakulteId} />
+            </div>
+            <div className="flex-[1_1_120px]">
+              <Dropdown label="Dönem" value={secilenDonem}
+                onChange={donemDegisti} options={donemOptions}
+                disabled={!secilenBolum} />
+            </div>
           </div>
         </div>
 
@@ -154,7 +165,7 @@ export default function App() {
             {Object.keys(notlar).length > 0 && (
               <button
                 onClick={notlariTemizle}
-                className="mt-3 px-4 py-2 border-2 border-red-200 rounded-lg bg-white text-red-500 text-xs font-semibold cursor-pointer transition-colors hover:bg-red-50"
+                className="mt-3 px-4 py-2 border-2 border-red-200 dark:border-red-900 rounded-lg bg-white dark:bg-gray-900 text-red-500 dark:text-red-400 text-xs font-semibold cursor-pointer transition-colors hover:bg-red-50 dark:hover:bg-red-950/40"
               >
                 Notları Temizle
               </button>

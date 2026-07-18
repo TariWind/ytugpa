@@ -1,11 +1,26 @@
 @import "tailwindcss";
 
 
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+
 @theme {
   --color-ytu-red: #B5122E;
   --color-ytu-dark: #8C0D22;
   --color-ytu-light: #fdf0f2;
+
+
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Menlo", monospace;
 }
 
 
 @variant dark (&:where(.dark, .dark *));
+
+
+@layer base {
+  body {
+    @apply bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-50;
+  }
+}
