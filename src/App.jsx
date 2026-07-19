@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { FAKULTELER, DONEMLER } from "./data/bolumler";
 import { DERSLER } from "./data/dersler";
-import DersListesi from "./components/DersListesi";
 import { gpaHesapla } from "./utils/hesapla";
-import GpaKarti from "./components/GpaKarti";
+import DonemGorunumu from "./components/DonemGorunumu";
+import SinifGorunumu from "./components/SinifGorunumu";
+import TumGorunum from "./components/TumGorunum";
 import KumulatifGpa from "./components/KumulatifGpa";
+import GorunumToggle from "./components/GorunumToggle";
 import TemaToggle from "./components/TemaToggle";
 import { useDarkMode } from "./hooks/useDarkMode";
-
 function localKey(fid, bolum, donem) {
   return `ytugpa_${fid}_${encodeURIComponent(bolum)}_${donem}`;
 }
@@ -116,64 +117,94 @@ export default function App() {
     setDonemVerileri(veriler);
   }, [secilenFakulteId, secilenBolum, notlar]);
 
-  return (
-    <>
-      <header className="sticky top-0 z-10 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-colors duration-200">
-        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-2 h-6 bg-ytu-red rounded-full" />
-            <div>
-              <h1 className="font-display text-base font-bold text-gray-900 dark:text-white leading-tight">
-                YTÜ GPA Hesaplayıcı
-              </h1>
-              <p className="text-xs text-gray-400 dark:text-gray-500 leading-tight">
-                Bölümünü seç · notlarını gir · ortalamana bak
-              </p>
-            </div>
-          </div>
-          <TemaToggle karanlik={karanlik} onToggle={setKaranlik} />
-        </div>
-      </header>
 
-      <main className="max-w-3xl mx-auto px-6 pt-8 pb-20">
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow-sm transition-colors duration-200">
-          <div className="flex gap-3 flex-wrap">
-            <div className="flex-[2_1_200px]">
-              <Dropdown label="Fakülte" value={secilenFakulteId}
-                onChange={fakulteDegisti} options={fakulteOptions} />
-            </div>
-            <div className="flex-[2_1_200px]">
-              <Dropdown label="Bölüm" value={secilenBolum}
-                onChange={bolumDegisti} options={bolumOptions}
-                disabled={!secilenFakulteId} />
-            </div>
+  const [gorunumModu, setGorunumModu] = useState(() => {
+  return localStorage.getItem("ytugpa_gorunum") || "donem";
+});
+
+function gorunumDegisti(yeniMod) {
+  setGorunumModu(yeniMod);
+  localStorage.setItem("ytugpa_gorunum", yeniMod);
+}
+
+  const bolumSecili = Boolean(secilenFakulteId && secilenBolum);
+
+return (
+  <>
+    <header className="sticky top-0 z-10 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-colors duration-200">
+      <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="w-2 h-6 bg-ytu-red rounded-full" />
+          <div>
+            <h1 className="font-display text-base font-bold text-gray-900 dark:text-white leading-tight">
+              YTÜ GPA Hesaplayıcı
+            </h1>
+            <p className="text-xs text-gray-400 dark:text-gray-500 leading-tight">
+              Bölümünü seç · notlarını gir · ortalamana bak
+            </p>
+          </div>
+        </div>
+        <TemaToggle karanlik={karanlik} onToggle={setKaranlik} />
+      </div>
+    </header>
+
+    <main className="max-w-3xl mx-auto px-6 pt-8 pb-20">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow-sm transition-colors duration-200">
+
+        {/* Görünüm modu */}
+        <div className="flex items-center justify-between flex-wrap gap-3 mb-4 pb-4 border-b border-gray-100 dark:border-gray-800">
+          <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+            Görünüm
+          </span>
+          <GorunumToggle mod={gorunumModu} onChange={gorunumDegisti} />
+        </div>
+
+        {/* Seçiciler */}
+        <div className="flex gap-3 flex-wrap">
+          <div className="flex-[2_1_200px]">
+            <Dropdown label="Fakülte" value={secilenFakulteId}
+              onChange={fakulteDegisti} options={fakulteOptions} />
+          </div>
+          <div className="flex-[2_1_200px]">
+            <Dropdown label="Bölüm" value={secilenBolum}
+              onChange={bolumDegisti} options={bolumOptions}
+              disabled={!secilenFakulteId} />
+          </div>
+          {gorunumModu === "donem" && (
             <div className="flex-[1_1_120px]">
               <Dropdown label="Dönem" value={secilenDonem}
                 onChange={donemDegisti} options={donemOptions}
                 disabled={!secilenBolum} />
             </div>
-          </div>
+          )}
         </div>
+      </div>
 
-        {dersler !== null && (
-          <>
-            <DersListesi
+      {bolumSecili && (
+        <>
+          {gorunumModu === "donem" && dersler !== null && (
+            <DonemGorunumu
               dersler={dersler} notlar={notlar}
               onNotDegisti={notDegisti} donem={secilenDonem}
+              gpasonucu={gpasonucu} notlariTemizle={notlariTemizle}
             />
-            <GpaKarti sonuc={gpasonucu} />
-            {Object.keys(notlar).length > 0 && (
-              <button
-                onClick={notlariTemizle}
-                className="mt-3 px-4 py-2 border-2 border-red-200 dark:border-red-900 rounded-lg bg-white dark:bg-gray-900 text-red-500 dark:text-red-400 text-xs font-semibold cursor-pointer transition-colors hover:bg-red-50 dark:hover:bg-red-950/40"
-              >
-                Notları Temizle
-              </button>
-            )}
-            <KumulatifGpa donemVerileri={donemVerileri} />
-          </>
-        )}
-      </main>
-    </>
-  );
+          )}
+          {gorunumModu === "donem" && dersler === null && (
+            <div className="mt-8 text-sm text-gray-400 dark:text-gray-500 text-center py-6">
+              Görmek istediğin dönemi seç.
+            </div>
+          )}
+          {gorunumModu === "sinif" && (
+            <SinifGorunumu fakulteId={secilenFakulteId} bolum={secilenBolum} />
+          )}
+          {gorunumModu === "tumu" && (
+            <TumGorunum fakulteId={secilenFakulteId} bolum={secilenBolum} />
+          )}
+
+          <KumulatifGpa donemVerileri={donemVerileri} />
+        </>
+      )}
+    </main>
+  </>
+);
 }
