@@ -1,14 +1,35 @@
-export default function TumGorunum({ fakulteId, bolum }) {
+import { DERSLER } from "../data/dersler";
+import { DONEMLER } from "../data/bolumler";
+import { gpaHesapla } from "../utils/hesapla";
+import DersListesi from "./DersListesi";
+import GpaKarti from "./GpaKarti";
+
+export default function TumGorunum({ fakulteId, bolum, tumNotlar, onNotDegisti }) {
     return (
-        <div className="mt-8 px-6 py-10 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-2xl text-center">
-        <div className="text-3xl mb-2">🚧</div>
-        <div className="font-display font-bold text-gray-700 dark:text-gray-200 mb-1">
-            Tümü görünümü yakında
-        </div>
-        <p className="text-sm text-gray-400 dark:text-gray-500 max-w-sm mx-auto">
-            Tüm dönemler tek sayfada, aynı anda düzenlenebilir olacak —
-            yarın bu görünümü tamamlıyoruz.
-        </p>
+        <div className="mt-6 space-y-8">
+        {DONEMLER.map((donem) => {
+            const dersler = DERSLER[fakulteId]?.[bolum]?.[donem] ?? [];
+            if (dersler.length === 0) return null; // veri yoksa hiç gösterme, kalabalık etmesin
+
+            const notlar = tumNotlar[donem] ?? {};
+            const sonuc  = gpaHesapla(dersler, notlar);
+
+            return (
+            <div key={donem}>
+                <h3 className="font-display font-bold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-ytu-red rounded-full" />
+                {donem}. Dönem
+                </h3>
+                <DersListesi
+                dersler={dersler}
+                notlar={notlar}
+                onNotDegisti={(kod, yeniNot) => onNotDegisti(donem, kod, yeniNot)}
+                donem={donem}
+                />
+                <GpaKarti sonuc={sonuc} />
+            </div>
+            );
+        })}
         </div>
     );
 }
