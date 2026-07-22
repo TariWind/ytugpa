@@ -42,9 +42,14 @@ export function kumulatifGpaHesapla(donemVerileri) {
     let toplamKrediXKatsayi = 0;
     let toplamKredi = 0;
     let toplamDers = 0;
+    let gercekDonemSayisi = 0;
 
 
-    for (const { dersler, notlar } of donemVerileri) {
+    for (const veri of donemVerileri) {
+        const { dersler, notlar, donem } = veri;
+        let buGrupDersSayisi = 0;
+
+
         for (const ders of dersler) {
             const harf = notlar[ders.kod];
             if (!harf) continue;
@@ -52,7 +57,11 @@ export function kumulatifGpaHesapla(donemVerileri) {
             toplamKrediXKatsayi += ders.kredi * katsayi;
             toplamKredi += ders.kredi;
             toplamDers++;
+            buGrupDersSayisi++;
         }
+
+
+        if (buGrupDersSayisi > 0 && typeof donem === "number") gercekDonemSayisi++;
     }
 
 
@@ -63,6 +72,6 @@ export function kumulatifGpaHesapla(donemVerileri) {
         gpa: (toplamKrediXKatsayi / toplamKredi).toFixed(2),
         toplamKredi,
         toplamDers,
-        donemSayisi: donemVerileri.length,
+        donemSayisi: gercekDonemSayisi,
     };
 }

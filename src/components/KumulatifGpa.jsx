@@ -19,15 +19,17 @@ export default function KumulatifGpa({ donemVerileri }) {
         </div>
 
         <div className="mb-4 space-y-1.5">
-            {donemVerileri.map(({ donem, dersler, notlar }) => {
+            {donemVerileri.map(( veri ) => {
+            const { donem, dersler, notlar, etiket } = veri;
             const sonuc = gpaHesapla(dersler, notlar);
             if (!sonuc) return null;
             const { text: dText } = gpaDurumu(sonuc.gpa);
+            const gosterilenEtiket = etiket ?? `${donem}. Dönem`;
             return (
-                <div key={donem}
+                <div key={etiket ?? donem}
                 className="flex justify-between items-center px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg text-sm shadow-sm transition-colors duration-200">
                 <span className="font-semibold text-gray-700 dark:text-gray-200">
-                    {donem}. Dönem
+                    {gosterilenEtiket}
                     <span className="text-gray-400 dark:text-gray-500 font-normal ml-2 text-xs">
                     {sonuc.girilenDersSayisi} ders · {sonuc.toplamKredi} kredi
                     </span>

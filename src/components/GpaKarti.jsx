@@ -1,6 +1,6 @@
 import { gpaDurumu } from "../utils/renkler";
 
-export default function GpaKarti({ sonuc }) {
+export default function GpaKarti({ sonuc, baslik = "Dönem Ortalaması" }) {
     if (!sonuc) return null;
 
     const { gpa, toplamKredi, girilenDersSayisi, toplamDersSayisi } = sonuc;
@@ -12,7 +12,7 @@ export default function GpaKarti({ sonuc }) {
         <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
             <div className="text-xs font-bold tracking-widest uppercase text-gray-400 dark:text-gray-500 mb-1">
-                Dönem Ortalaması
+                {baslik}
             </div>
             <div className={`font-mono text-6xl font-bold leading-none tracking-tight tabular-nums ${text}`}>
                 {gpa}

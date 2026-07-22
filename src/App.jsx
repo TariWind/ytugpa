@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { FAKULTELER, DONEMLER } from "./data/bolumler";
 import { DERSLER } from "./data/dersler";
 import { gpaHesapla } from "./utils/hesapla";
+import { dersHavuzuGetir } from "./utils/dersHavuzu";
 import DonemGorunumu from "./components/DonemGorunumu";
 import SinifGorunumu from "./components/SinifGorunumu";
 import TumGorunum from "./components/TumGorunum";
+import EkstraDersler from "./components/EkstraDersler";
 import KumulatifGpa from "./components/KumulatifGpa";
 import GorunumToggle from "./components/GorunumToggle";
 import TemaToggle from "./components/TemaToggle";
@@ -12,6 +14,13 @@ import { useDarkMode } from "./hooks/useDarkMode";
 
 function localKey(fid, bolum, donem) {
   return `ytugpa_${fid}_${encodeURIComponent(bolum)}_${donem}`;
+}
+function ekstraKey(fid, bolum) {
+  return `ytugpa_ekstra_${fid}_${encodeURIComponent(bolum)}`;
+}
+
+function ekstraAnahtar(kod, donem) {
+  return `${kod}::${donem}`;
 }
 
 function Dropdown({ label, value, onChange, options, disabled }) {
@@ -41,7 +50,8 @@ export default function App() {
   const [secilenFakulteId, setSecilenFakulteId] = useState("");
   const [secilenBolum, setSecilenBolum]         = useState("");
   const [secilenDonem, setSecilenDonem]         = useState("");
-  const [tumNotlar, setTumNotlar]               = useState({}); 
+  const [tumNotlar, setTumNotlar]               = useState({});
+  const [ekstraDersler, setEkstraDersler]       = useState({}); // { "kod::donem": harf }
   const [gorunumModu, setGorunumModu]           = useState(() => localStorage.getItem("ytugpa_gorunum") || "donem");
 
   const secilenFakulte = FAKULTELER.find((f) => f.id === secilenFakulteId);
@@ -62,23 +72,18 @@ export default function App() {
     localStorage.setItem("ytugpa_gorunum", yeniMod);
   }
 
-  
   function notDegisti(donem, dersKodu, yeniNot) {
     setTumNotlar((onceki) => {
       const buDonem = { ...(onceki[donem] || {}) };
       if (yeniNot) { buDonem[dersKodu] = yeniNot; }
       else         { delete buDonem[dersKodu]; }
-
-      const key = localKey(secilenFakulteId, secilenBolum, donem);
-      localStorage.setItem(key, JSON.stringify(buDonem));
-
+      localStorage.setItem(localKey(secilenFakulteId, secilenBolum, donem), JSON.stringify(buDonem));
       return { ...onceki, [donem]: buDonem };
     });
   }
 
   function notlariTemizle(donem) {
-    const key = localKey(secilenFakulteId, secilenBolum, donem);
-    localStorage.removeItem(key);
+    localStorage.removeItem(localKey(secilenFakulteId, secilenBolum, donem));
     setTumNotlar((onceki) => {
       const yeni = { ...onceki };
       delete yeni[donem];
@@ -87,18 +92,44 @@ export default function App() {
   }
 
   
+  function ekstraEkle(kod, donem) {
+    setEkstraDersler((onceki) => {
+      const yeni = { ...onceki, [ekstraAnahtar(kod, donem)]: "" };
+      localStorage.setItem(ekstraKey(secilenFakulteId, secilenBolum), JSON.stringify(yeni));
+      return yeni;
+    });
+  }
+  function ekstraNotDegisti(kod, donem, yeniNot) {
+    setEkstraDersler((onceki) => {
+      const yeni = { ...onceki, [ekstraAnahtar(kod, donem)]: yeniNot };
+      localStorage.setItem(ekstraKey(secilenFakulteId, secilenBolum), JSON.stringify(yeni));
+      return yeni;
+    });
+  }
+  function ekstraSil(kod, donem) {
+    setEkstraDersler((onceki) => {
+      const yeni = { ...onceki };
+      delete yeni[ekstraAnahtar(kod, donem)];
+      localStorage.setItem(ekstraKey(secilenFakulteId, secilenBolum), JSON.stringify(yeni));
+      return yeni;
+    });
+  }
+
   useEffect(() => {
     if (!secilenFakulteId || !secilenBolum) {
       setTumNotlar({});
+      setEkstraDersler({});
       return;
     }
     const yukle = {};
     for (const donem of DONEMLER) {
-      const key = localKey(secilenFakulteId, secilenBolum, donem);
-      const kayitli = localStorage.getItem(key);
+      const kayitli = localStorage.getItem(localKey(secilenFakulteId, secilenBolum, donem));
       if (kayitli) yukle[donem] = JSON.parse(kayitli);
     }
     setTumNotlar(yukle);
+
+    const ekstraKayitli = localStorage.getItem(ekstraKey(secilenFakulteId, secilenBolum));
+    setEkstraDersler(ekstraKayitli ? JSON.parse(ekstraKayitli) : {});
   }, [secilenFakulteId, secilenBolum]);
 
   const dersler =
@@ -109,15 +140,33 @@ export default function App() {
   const donemNotlari = tumNotlar[Number(secilenDonem)] ?? {};
   const gpasonucu = dersler ? gpaHesapla(dersler, donemNotlari) : null;
 
+  
+  const havuzTumu = (secilenFakulteId && secilenBolum) ? dersHavuzuGetir(secilenFakulteId, secilenBolum) : [];
+  const ekstraAnahtarlari = Object.keys(ekstraDersler);
+  const ekstraDersListesi = havuzTumu.filter((d) =>
+    ekstraAnahtarlari.includes(ekstraAnahtar(d.kod, d.donem))
+  );
+
+  
+  const ekstraNotlarKodBazli = Object.fromEntries(
+    ekstraDersListesi.map((d) => [d.kod, ekstraDersler[ekstraAnahtar(d.kod, d.donem)]])
+  );
+
+  
   const donemVerileri = (secilenFakulteId && secilenBolum)
-    ? DONEMLER
-        .map((donem) => {
-          const dl = DERSLER[secilenFakulteId]?.[secilenBolum]?.[donem] ?? [];
-          const nt = tumNotlar[donem] ?? {};
-          if (dl.length === 0 || Object.keys(nt).length === 0) return null;
-          return { donem, dersler: dl, notlar: nt };
-        })
-        .filter(Boolean)
+    ? [
+        ...DONEMLER
+          .map((donem) => {
+            const dl = DERSLER[secilenFakulteId]?.[secilenBolum]?.[donem] ?? [];
+            const nt = tumNotlar[donem] ?? {};
+            if (dl.length === 0 || Object.keys(nt).length === 0) return null;
+            return { donem, dersler: dl, notlar: nt };
+          })
+          .filter(Boolean),
+        ...(ekstraDersListesi.length > 0
+          ? [{ etiket: "Ekstra Dersler", dersler: ekstraDersListesi, notlar: ekstraNotlarKodBazli }]
+          : []),
+      ]
     : [];
 
   const fakulteOptions = FAKULTELER.map((f) => ({ value: f.id, label: f.isim }));
@@ -155,7 +204,6 @@ export default function App() {
 
       <main className="max-w-3xl mx-auto px-6 pt-8 pb-20">
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow-sm transition-colors duration-200">
-
           <div className="flex items-center justify-between flex-wrap gap-3 mb-4 pb-4 border-b border-gray-100 dark:border-gray-800">
             <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
               Görünüm
@@ -209,6 +257,14 @@ export default function App() {
                 tumNotlar={tumNotlar} onNotDegisti={notDegisti}
               />
             )}
+
+            <EkstraDersler
+              fakulteId={secilenFakulteId} bolum={secilenBolum}
+              tumNotlar={tumNotlar} ekstraDersler={ekstraDersler}
+              onEkstraEkle={ekstraEkle}
+              onEkstraNotDegisti={ekstraNotDegisti}
+              onEkstraSil={ekstraSil}
+            />
 
             <KumulatifGpa donemVerileri={donemVerileri} />
           </>
