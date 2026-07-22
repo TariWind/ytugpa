@@ -1,13 +1,16 @@
 import DersListesi from "./DersListesi";
 import GpaKarti from "./GpaKarti";
+import { ekstraKodlariGetir } from "../utils/ekstra";
 
-export default function DonemGorunumu({ dersler, notlar, onNotDegisti, donem, gpasonucu, notlariTemizle }) {
+export default function DonemGorunumu({ dersler, notlar, onNotDegisti, donem, gpasonucu, notlariTemizle, ekstraDersler }) {
+    const ekstraKodlari = ekstraKodlariGetir(ekstraDersler, donem);
     return (
         <>
         <DersListesi
             dersler={dersler} notlar={notlar}
             onNotDegisti={(kod, yeniNot) => onNotDegisti(donem, kod, yeniNot)}
             donem={donem}
+            ekstraKodlari = {ekstraKodlari}
         />
         <GpaKarti sonuc={gpasonucu} />
         {Object.keys(notlar).length > 0 && (

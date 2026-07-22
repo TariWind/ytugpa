@@ -1,6 +1,6 @@
 import { HARF_NOTLARI } from "../data/dersler";
 
-export default function DersListesi({ dersler, notlar, onNotDegisti, donem }) {
+export default function DersListesi({ dersler, notlar, onNotDegisti, donem, ekstraKodlari = [] }) {
     if (!dersler || dersler.length === 0) {
         return (
         <div className="mt-6 px-4 py-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-xl text-red-600 dark:text-red-400 text-sm">
@@ -24,6 +24,7 @@ export default function DersListesi({ dersler, notlar, onNotDegisti, donem }) {
             <tbody className="bg-white dark:bg-gray-900">
             {dersler.map((ders) => {
                 const secilenNot = notlar[ders.kod] || "";
+                const zatenEkstrada = ekstraKodlari.includes(ders.kod)
                 return (
                 <tr key={ders.kod}
                     className="border-b border-gray-100 dark:border-gray-800 last:border-b-0 hover:bg-ytu-light dark:hover:bg-gray-800/60 transition-colors duration-100">
@@ -32,16 +33,26 @@ export default function DersListesi({ dersler, notlar, onNotDegisti, donem }) {
                     <td className="px-3.5 py-2.5 text-center text-gray-700 dark:text-gray-300 tabular-nums">{ders.kredi}</td>
                     <td className="px-3.5 py-2.5 text-center text-gray-700 dark:text-gray-300 tabular-nums">{ders.akts}</td>
                     <td className="px-3.5 py-2.5 text-center">
-                    <select
-                        value={secilenNot}
-                        onChange={(e) => onNotDegisti(ders.kod, e.target.value)}
-                        className={`${secilenNot ? `not-${secilenNot}` : "bg-white dark:bg-gray-800"} font-mono w-[70px] px-2 py-1 border-2 border-gray-200 dark:border-gray-700 rounded-md text-xs font-bold cursor-pointer transition-all focus:outline-none focus:border-ytu-red text-gray-800 dark:text-gray-100`}
-                    >
-                        <option value="">—</option>
-                        {HARF_NOTLARI.map((n) => (
-                        <option key={n.harf} value={n.harf}>{n.harf}</option>
-                        ))}
-                    </select>
+                        {zatenEkstrada ? (
+                            <span
+                                title = "Bu derslerin notu Ekstra Derslerde giriliyor"
+                                className = "inline-block px-2 py-1 rounded-md text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                            >
+                                Ekstra'da
+                            </span>
+                        ) : (
+                            <select
+                                value = {secilenNot}
+                                onChange = {(e) => onNotDegisti(ders.kod, e.target.value)}
+                                className = {`${secilenNot ? `not-${secilenNot}` : "bg-white dark:bg-gray-800"} font-mono w-[70px] px-2 py-1 border-2 border-gray-200 dark:border-gray-700 rounded-md text-xs font-bold cursor-pointer transition-all focus:outline-none focus:border-ytu-red text-gray-800 dark:text-gray-100`}
+                            >
+                                <option value = "">—</option>
+                                {HARF_NOTLARI.map((n) => (
+                                    <option key = {n.harf} value = {n.harf}>{n.harf}</option>
+                                ))}
+                            </select>
+                        )}
+                    
                     </td>
                 </tr>
                 );

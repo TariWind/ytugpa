@@ -1,10 +1,11 @@
 import { DERSLER } from "../data/dersler";
 import { DONEMLER } from "../data/bolumler";
 import { gpaHesapla } from "../utils/hesapla";
+import { ekstraKodlariGetir } from "../utils/ekstra";
 import DersListesi from "./DersListesi";
 import GpaKarti from "./GpaKarti";
 
-export default function TumGorunum({ fakulteId, bolum, tumNotlar, onNotDegisti }) {
+export default function TumGorunum({ fakulteId, bolum, tumNotlar, onNotDegisti, ekstraDersler }) {
     return (
         <div className="mt-6 space-y-8">
         {DONEMLER.map((donem) => {
@@ -13,6 +14,7 @@ export default function TumGorunum({ fakulteId, bolum, tumNotlar, onNotDegisti }
 
             const notlar = tumNotlar[donem] ?? {};
             const sonuc  = gpaHesapla(dersler, notlar);
+            const ekstraKodlari = ekstraKodlariGetir(ekstraDersler, donem);
 
             return (
             <div key={donem}>
@@ -25,6 +27,7 @@ export default function TumGorunum({ fakulteId, bolum, tumNotlar, onNotDegisti }
                 notlar={notlar}
                 onNotDegisti={(kod, yeniNot) => onNotDegisti(donem, kod, yeniNot)}
                 donem={donem}
+                ekstraKodlari = {ekstraKodlari}
                 />
                 <GpaKarti sonuc={sonuc} />
             </div>

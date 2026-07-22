@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { DERSLER } from "../data/dersler";
 import { gpaHesapla } from "../utils/hesapla";
+import { ekstraKodlariGetir } from "../utils/ekstra";
 import DersListesi from "./DersListesi";
 import GpaKarti from "./GpaKarti";
 
@@ -11,7 +12,7 @@ const SINIFLAR = [
     { sinif: 4, donemler: [7, 8] },
 ];
 
-export default function SinifGorunumu({ fakulteId, bolum, tumNotlar, onNotDegisti }) {
+export default function SinifGorunumu({ fakulteId, bolum, tumNotlar, onNotDegisti, ekstraDersler }) {
     const [secilenSinif, setSecilenSinif] = useState(1);
     const aktif = SINIFLAR.find((s) => s.sinif === secilenSinif);
 
@@ -38,6 +39,7 @@ export default function SinifGorunumu({ fakulteId, bolum, tumNotlar, onNotDegist
             const dersler = DERSLER[fakulteId]?.[bolum]?.[donem] ?? [];
             const notlar  = tumNotlar[donem] ?? {};
             const sonuc   = dersler.length > 0 ? gpaHesapla(dersler, notlar) : null;
+            const ekstraKodlari = ekstraKodlariGetir(ekstraDersler, donem);
 
             return (
                 <div key={donem}>
@@ -50,6 +52,7 @@ export default function SinifGorunumu({ fakulteId, bolum, tumNotlar, onNotDegist
                     notlar={notlar}
                     onNotDegisti={(kod, yeniNot) => onNotDegisti(donem, kod, yeniNot)}
                     donem={donem}
+                    ekstraKodlari = {ekstraKodlari}
                 />
                 <GpaKarti sonuc={sonuc} />
                 </div>

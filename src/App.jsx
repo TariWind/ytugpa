@@ -11,6 +11,7 @@ import KumulatifGpa from "./components/KumulatifGpa";
 import GorunumToggle from "./components/GorunumToggle";
 import TemaToggle from "./components/TemaToggle";
 import { useDarkMode } from "./hooks/useDarkMode";
+import { ekstraAnahtar } from "./utils/ekstra";
 
 function localKey(fid, bolum, donem) {
   return `ytugpa_${fid}_${encodeURIComponent(bolum)}_${donem}`;
@@ -19,9 +20,7 @@ function ekstraKey(fid, bolum) {
   return `ytugpa_ekstra_${fid}_${encodeURIComponent(bolum)}`;
 }
 
-function ekstraAnahtar(kod, donem) {
-  return `${kod}::${donem}`;
-}
+
 
 function Dropdown({ label, value, onChange, options, disabled }) {
   return (
@@ -238,6 +237,7 @@ export default function App() {
                 dersler={dersler} notlar={donemNotlari}
                 onNotDegisti={notDegisti} donem={Number(secilenDonem)}
                 gpasonucu={gpasonucu} notlariTemizle={notlariTemizle}
+                ekstraDersler = {ekstraDersler}
               />
             )}
             {gorunumModu === "donem" && dersler === null && (
@@ -249,12 +249,14 @@ export default function App() {
               <SinifGorunumu
                 fakulteId={secilenFakulteId} bolum={secilenBolum}
                 tumNotlar={tumNotlar} onNotDegisti={notDegisti}
+                ekstraDersler = {ekstraDersler}
               />
             )}
             {gorunumModu === "tumu" && (
               <TumGorunum
                 fakulteId={secilenFakulteId} bolum={secilenBolum}
                 tumNotlar={tumNotlar} onNotDegisti={notDegisti}
+                ekstraDersler = {ekstraDersler}
               />
             )}
 

@@ -3,11 +3,10 @@ import { dersHavuzuGetir } from "../utils/dersHavuzu";
 import { gpaHesapla } from "../utils/hesapla";
 import { HARF_NOTLARI } from "../data/dersler";
 import GpaKarti from "./GpaKarti";
+import { ekstraAnahtar } from "../utils/ekstra";
 
 
-function ekstraAnahtar(kod, donem) {
-    return `${kod}::${donem}`;
-}
+
 
 export default function EkstraDersler({
     fakulteId, bolum, tumNotlar, ekstraDersler,
