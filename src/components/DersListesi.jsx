@@ -1,6 +1,6 @@
 import { HARF_NOTLARI } from "../data/dersler";
 
-export default function DersListesi({ dersler, notlar, onNotDegisti, donem, ekstraKodlari = [] }) {
+export default function DersListesi({ dersler, notlar, onNotDegisti, donem, ekstraKodlari = [], vurgulananKod = null }) {
     if (!dersler || dersler.length === 0) {
         return (
         <div className="mt-6 px-4 py-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-xl text-red-600 dark:text-red-400 text-sm">
@@ -24,10 +24,11 @@ export default function DersListesi({ dersler, notlar, onNotDegisti, donem, ekst
             <tbody className="bg-white dark:bg-gray-900">
             {dersler.map((ders) => {
                 const secilenNot = notlar[ders.kod] || "";
-                const zatenEkstrada = ekstraKodlari.includes(ders.kod)
+                const zatenEkstrada = ekstraKodlari.includes(ders.kod);
+                const vurgulu = ders.kod === vurgulananKod;
                 return (
                 <tr key={ders.kod}
-                    className="border-b border-gray-100 dark:border-gray-800 last:border-b-0 hover:bg-ytu-light dark:hover:bg-gray-800/60 transition-colors duration-100">
+                    className={`border-b border-gray-100 dark:border-gray-800 last:border-b-0 hover:bg-ytu-light dark:hover:bg-gray-800/60 transition-colors duration-100 ${vurgulu ? "vurgu-satir" : ""}`}>
                     <td className="px-3.5 py-2.5 font-mono text-xs text-gray-400 dark:text-gray-500">{ders.kod}</td>
                     <td className="px-3.5 py-2.5 text-gray-700 dark:text-gray-200">{ders.ad}</td>
                     <td className="px-3.5 py-2.5 text-center text-gray-700 dark:text-gray-300 tabular-nums">{ders.kredi}</td>

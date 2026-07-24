@@ -10,6 +10,8 @@ import EkstraDersler from "./components/EkstraDersler";
 import KumulatifGpa from "./components/KumulatifGpa";
 import GorunumToggle from "./components/GorunumToggle";
 import TemaToggle from "./components/TemaToggle";
+import AramaTetikleyici from "./components/AramaTetikleyici";
+import DersAramaModal from "./components/DersAramaModal";
 import { useDarkMode } from "./hooks/useDarkMode";
 import { ekstraAnahtar } from "./utils/ekstra";
 
@@ -52,6 +54,10 @@ export default function App() {
   const [tumNotlar, setTumNotlar]               = useState({});
   const [ekstraDersler, setEkstraDersler]       = useState({}); // { "kod::donem": harf }
   const [gorunumModu, setGorunumModu]           = useState(() => localStorage.getItem("ytugpa_gorunum") || "donem");
+
+
+  const [aramaAcik, setAramaAcik] = useState(false);
+  const [vurgulananKod, setVurgulananKod] = useState(null);
 
   const secilenFakulte = FAKULTELER.find((f) => f.id === secilenFakulteId);
 
@@ -113,6 +119,18 @@ export default function App() {
       return yeni;
     });
   }
+  
+  
+  function dersSecildi(sonuc) {
+    setSecilenFakulteId(sonuc.fakulteId);
+    setSecilenBolum(sonuc.bolum);
+    setSecilenDonem(String(sonuc.donem));
+    setGorunumModu("donem");
+    localStorage.setItem("ytugpa_gorunum", "donem");
+    setAramaAcik(false);
+    setVurgulananKod(sonuc.kod);
+    setTimeout(() => setVurgulananKod(null), 2200);
+  }
 
   useEffect(() => {
     if (!secilenFakulteId || !secilenBolum) {
@@ -130,6 +148,18 @@ export default function App() {
     const ekstraKayitli = localStorage.getItem(ekstraKey(secilenFakulteId, secilenBolum));
     setEkstraDersler(ekstraKayitli ? JSON.parse(ekstraKayitli) : {});
   }, [secilenFakulteId, secilenBolum]);
+
+
+  useEffect(() => {
+    function kisayolDinle(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setAramaAcik(true);
+      }
+    }
+    document.addEventListener("keydown", kisayolDinle);
+    return () => document.removeEventListener("keydown", kisayolDinle);
+  }, []);
 
   const dersler =
     secilenFakulteId && secilenBolum && secilenDonem
@@ -197,7 +227,10 @@ export default function App() {
               </p>
             </div>
           </div>
-          <TemaToggle karanlik={karanlik} onToggle={setKaranlik} />
+          <div className = "flex items-center gap-2">
+            <AramaTetikleyici onClick = {() => setAramaAcik(true)} />
+            <TemaToggle karanlik={karanlik} onToggle={setKaranlik} />
+          </div>
         </div>
       </header>
 
@@ -238,6 +271,7 @@ export default function App() {
                 onNotDegisti={notDegisti} donem={Number(secilenDonem)}
                 gpasonucu={gpasonucu} notlariTemizle={notlariTemizle}
                 ekstraDersler = {ekstraDersler}
+                vurgulananKod = {vurgulananKod}
               />
             )}
             {gorunumModu === "donem" && dersler === null && (
@@ -271,7 +305,29 @@ export default function App() {
             <KumulatifGpa donemVerileri={donemVerileri} />
           </>
         )}
+
+
+        {!bolumSecili && (
+          <div className = "mt-10 text-center">
+            <p className = "text-sm text-gray-400 dark:text-gray-500 mb-3">
+              Bölümünü seçmeden dersi doğrudan arayabilirsin.
+            </p>
+            <button
+              onClick = {() => setAramaAcik(true)}
+              className = "text-sm font-semibold text-ytu-red dark:text-red-400 hover:underline"
+            >
+              Ders ara →
+            </button>
+          </div>
+        )}
       </main>
+
+
+      <DersAramaModal
+        acik = {aramaAcik}
+        onKapat = {() => setAramaAcik(false)}
+        onSecim = {dersSecildi}
+      />
     </>
   );
 }
